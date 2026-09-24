@@ -13,11 +13,22 @@ Completed:
 - Added a repeatable seed with two semesters and five courses.
 - Added `.env.example` with separate pooled and direct Neon connection placeholders.
 
+## Phase 2: Calculation functions and grade scale
+
+Status: Complete.
+
+Completed:
+
+- Added database-free pure functions in `lib/calculations.js` for category averages, weight validation, course grades, GPA, projections, and sample final grades.
+- Centralized course percentage rounding in `roundCoursePercentage`.
+- Added the exact grade scale in `lib/gradeScale.js`, including five color bands and the below-70 fail rule.
+- Added unit tests using Node's built-in test runner.
+
 Next:
 
-- Phase 2: Add pure calculation functions and the grade-scale lookup with unit tests.
+- Phase 3: Build the course page with category and score CRUD.
 
 Open decisions:
 
 - The single-user display name and final visual direction can be chosen during the UI phases.
-- Neon migration and seed commands require the real values already present in the local `.env` file.
+- Neon migration and seed are still pending because the database connection is failing. Do not run database-dependent commands until connectivity is restored.
