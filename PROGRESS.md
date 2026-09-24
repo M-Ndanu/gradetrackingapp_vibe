@@ -11,6 +11,7 @@ Completed:
 - Added the Year -> Semester -> Course -> Category -> Score schema with cascade deletes.
 - Added raw `createdAt` and `updatedAt` timestamps for future stale-data checks. No computed grades or GPA values are stored.
 - Added a repeatable seed with two semesters and five courses.
+- Applied the initial migration to Neon after database connectivity was restored.
 - Added `.env.example` with separate pooled and direct Neon connection placeholders.
 
 ## Phase 2: Calculation functions and grade scale
@@ -26,9 +27,26 @@ Completed:
 
 Next:
 
-- Phase 3: Build the course page with category and score CRUD.
+## Phase 3: Course page CRUD
+
+Status: Complete.
+
+Completed:
+
+- Added `/courses` as a simple course picker backed by Prisma.
+- Added `/courses/[courseId]` as a Server Component that loads the course hierarchy from Neon.
+- Added `CourseEditor` as a Client Component because category expansion, form result messages, and delete button interactions need browser state.
+- Added server actions for creating, editing, and deleting categories and scores.
+- Added server-side validation for required text, numeric marks, positive `outOf` values, mark limits, and category weights above 100%.
+- Added a running category weight total with a balanced/adjust-needed status.
+- Added friendly empty states and visible success/error feedback after mutations.
+- Ran the Neon seed successfully after connectivity was restored.
+
+Next:
+
+- Phase 4: Add target-grade projection to the course page.
 
 Open decisions:
 
 - The single-user display name and final visual direction can be chosen during the UI phases.
-- Neon migration and seed are still pending because the database connection is failing. Do not run database-dependent commands until connectivity is restored.
+- The Neon migration is applied. The seed should be run before testing the seeded course links if the database is empty.
