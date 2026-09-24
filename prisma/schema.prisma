@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Year {
+  id        String      @id @default(cuid())
+  label     String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  semesters Semester[]
+}
+
+model Semester {
+  id        String   @id @default(cuid())
+  name      String
+  yearId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  year      Year     @relation(fields: [yearId], references: [id], onDelete: Cascade)
+  courses   Course[]
+
+  @@unique([yearId, name])
+}
+
+model Course {
+  id               String     @id @default(cuid())
+  name             String
+  creditHours      Int
+  prerequisiteNote String?
+  semesterId       String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  semester         Semester   @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  categories       Category[]
+
+  @@unique([semesterId, name])
+}
+
+model Category {
+  id         String   @id @default(cuid())
+  name       String
+  weight     Float
+  isComplete Boolean  @default(false)
+  courseId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  scores     Score[]
+
+  @@unique([courseId, name])
+}
+
+model Score {
+  id         String   @id @default(cuid())
+  name       String
+  mark       Float
+  outOf      Float
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
