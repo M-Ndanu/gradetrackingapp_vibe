@@ -6,6 +6,7 @@ import {
   createScore,
   deleteCategory,
   deleteScore,
+  updateCourseTarget,
   updateCategory,
   updateScore,
 } from "./actions";
@@ -30,7 +31,7 @@ export default async function CoursePage({ params }) {
       <Link href="/courses" className="back-link">← All courses</Link>
       <CourseEditor
         course={course}
-        actions={{ createCategory, updateCategory, deleteCategory, createScore, updateScore, deleteScore }}
+        actions={{ createCategory, updateCategory, deleteCategory, createScore, updateScore, deleteScore, updateCourseTarget }}
       />
     </main>
   );

@@ -101,16 +101,13 @@ function CategorySection({ category, updateCategory, deleteCategory, createScore
   );
 }
 
-function ProjectionPanel({ course }) {
-  const [target, setTarget] = useState("80");
+function ProjectionPanel({ course, updateCourseTarget, onResult }) {
+  const [target, setTarget] = useState(course.targetPercentage === null ? "" : String(course.targetPercentage));
   const targetPercentage = Number(target);
-  const projection = projectCourseGrade(
-    course,
-    Number.isFinite(targetPercentage) ? targetPercentage : 0,
-    [50, 75, 100],
-  );
+  const hasTarget = target.trim() !== "" && Number.isFinite(targetPercentage);
+  const projection = hasTarget ? projectCourseGrade(course, targetPercentage, [50, 75, 100]) : null;
 
-  const statusMessage = {
+  const statusMessage = projection && {
     secured: "This target is already secured.",
     "out-of-reach": "This target is out of reach with the remaining work.",
     "in-progress": `You need an average of ${projection.neededAverage.toFixed(1)}% on the remaining work.`,
@@ -124,26 +121,31 @@ function ProjectionPanel({ course }) {
           <h2 className="section-title mt-2">Plan your finish</h2>
           <p className="mt-2 max-w-xl text-sm text-slate-500">See what average you need on incomplete categories to reach your target percentage.</p>
         </div>
-        <label className="w-32 text-sm font-semibold text-slate-600">
-          Target %
-          <input
-            className="field mt-1 text-lg font-bold"
-            type="number"
-            min="0"
-            max="100"
-            step="1"
-            value={target}
-            onChange={(event) => setTarget(event.target.value)}
-          />
-        </label>
+        <ActionForm action={updateCourseTarget} onResult={onResult} className="flex items-end gap-2">
+          <input type="hidden" name="courseId" value={course.id} />
+          <label className="w-32 text-sm font-semibold text-slate-600">
+            Target %
+            <input
+              className="field mt-1 text-lg font-bold"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              name="targetPercentage"
+              value={target}
+              onChange={(event) => setTarget(event.target.value)}
+            />
+          </label>
+          <SubmitButton>Save target</SubmitButton>
+        </ActionForm>
       </div>
 
-      <div className={`mt-6 rounded-2xl p-5 ${projection.status === "out-of-reach" ? "bg-red-50 text-red-900" : projection.status === "secured" ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"}`}>
+      {!hasTarget ? <p className="mt-6 rounded-2xl bg-slate-100 p-5 text-sm font-semibold text-slate-600">Enter and save a target percentage to see the projection.</p> : <div className={`mt-6 rounded-2xl p-5 ${projection.status === "out-of-reach" ? "bg-red-50 text-red-900" : projection.status === "secured" ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"}`}>
         <p className="text-lg font-bold">{statusMessage}</p>
         <p className="mt-2 text-sm opacity-80">{projection.remainingWeight}% of the course remains. {projection.earned.toFixed(1)} percentage points are secured.</p>
-      </div>
+      </div>}
 
-      <div className="mt-6">
+      {projection && <div className="mt-6">
         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Sample outcomes</h3>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           {projection.samples.map((sample) => (
@@ -155,7 +157,7 @@ function ProjectionPanel({ course }) {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </section>
   );
 }
@@ -177,7 +179,7 @@ export default function CourseEditor({ course, actions }) {
         <div className={`rounded-2xl px-5 py-4 ${weightIsValid ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}><p className="text-xs font-bold uppercase tracking-wider">Weight total</p><p className="text-3xl font-bold">{totalWeight}%</p><p className="text-sm">{weightIsValid ? "Balanced" : "Adjust to 100%"}</p></div>
       </div>
 
-      <ProjectionPanel course={course} />
+      <ProjectionPanel course={course} updateCourseTarget={actions.updateCourseTarget} onResult={handleResult} />
 
       <section className="panel">
         <div className="mb-2 flex items-center justify-between gap-4"><div><h2 className="section-title">Categories</h2><p className="text-sm text-slate-500">Organize your course work and keep the weights balanced.</p></div></div>

@@ -5,11 +5,10 @@ import GpaTrendChart from "@/app/components/GpaTrendChart";
 import SemesterCard from "@/app/components/SemesterCard";
 import StaleDataBanner from "@/app/components/StaleDataBanner";
 import {
-  DEFAULT_PROJECTION_TARGET,
   semesterSummary,
   staleCourseReasons,
 } from "@/lib/dashboard";
-import { calculateGpa, calculateProjectedGpa } from "@/lib/calculations";
+import { calculateGpa, calculateProjectedGpaFromTargets } from "@/lib/calculations";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
@@ -23,14 +22,14 @@ export default async function DashboardPage() {
     },
   });
   const newestFirst = [...semesters].sort((left, right) => right.createdAt - left.createdAt);
-  const summaries = newestFirst.map((semester) => semesterSummary(semester, DEFAULT_PROJECTION_TARGET));
+  const summaries = newestFirst.map((semester) => semesterSummary(semester));
   const allCourses = newestFirst.flatMap((semester) => semester.courses);
   const courseSummaries = summaries.flatMap((semester) => semester.courses);
   const staleCourses = allCourses
     .map((course) => ({ id: course.id, name: course.name, reasons: staleCourseReasons(course) }))
     .filter((course) => course.reasons.length > 0);
   const currentGpa = calculateGpa(allCourses);
-  const projectedGpa = calculateProjectedGpa(allCourses, DEFAULT_PROJECTION_TARGET);
+  const projectedGpa = calculateProjectedGpaFromTargets(allCourses);
   const trend = [...summaries].reverse();
 
   return (
@@ -46,8 +45,10 @@ export default async function DashboardPage() {
 
       <section className="mt-10 grid gap-4 md:grid-cols-2">
         <GpaCard label="Overall GPA" value={currentGpa} detail="Current credit-hour-weighted GPA" />
-        <GpaCard label="Projected GPA" value={projectedGpa} detail={`If in-progress courses reach ${DEFAULT_PROJECTION_TARGET}%`} />
+        <GpaCard label="Projected GPA" value={projectedGpa.gpa} emptyLabel="Not enough data for a projection" detail="Based on saved course targets" />
       </section>
+
+      {projectedGpa.missingCourses.length > 0 && <p className="mt-3 text-sm text-slate-600">Projected GPA is based on partial data. Missing targets: {projectedGpa.missingCourses.join(", ")}.</p>}
 
       <div className="mt-6"><StaleDataBanner staleCourses={staleCourses} /></div>
       <div className="mt-6"><GpaTrendChart semesters={trend} /></div>

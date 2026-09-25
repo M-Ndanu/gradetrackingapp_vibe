@@ -33,6 +33,21 @@ function nonNegativeNumber(value, fieldName) {
   return number;
 }
 
+function optionalPercentage(value, fieldName) {
+  const text = String(value ?? "").trim();
+
+  if (!text) {
+    return null;
+  }
+
+  const number = Number(text);
+  if (!Number.isFinite(number) || number < 0 || number > 100) {
+    throw new Error(`${fieldName} must be between 0 and 100.`);
+  }
+
+  return number;
+}
+
 async function ensureCourse(courseId) {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
@@ -181,5 +196,19 @@ export async function deleteScore(formData) {
     await prisma.score.delete({ where: { id: scoreId } });
     revalidatePath(`/courses/${score.category.courseId}`);
     return { success: "Score deleted." };
+  });
+}
+
+export async function updateCourseTarget(formData) {
+  return resultOrError(async () => {
+    const courseId = requiredText(formData.get("courseId"), "Course");
+    const course = await ensureCourse(courseId);
+    const targetPercentage = optionalPercentage(formData.get("targetPercentage"), "Target percentage");
+
+    await prisma.course.update({ where: { id: courseId }, data: { targetPercentage } });
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath(`/semesters/${course.semesterId}`);
+    revalidatePath("/");
+    return { success: targetPercentage === null ? "Target cleared." : "Target saved." };
   });
 }

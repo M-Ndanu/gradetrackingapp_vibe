@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import CourseSummaryCard from "@/app/components/CourseSummaryCard";
 import GpaCard from "@/app/components/GpaCard";
 import GpaTrendChart from "@/app/components/GpaTrendChart";
-import { DEFAULT_PROJECTION_TARGET, semesterSummary } from "@/lib/dashboard";
+import { semesterSummary } from "@/lib/dashboard";
 import { prisma } from "@/lib/prisma";
 
 export default async function SemesterPage({ params }) {
@@ -23,7 +23,7 @@ export default async function SemesterPage({ params }) {
     notFound();
   }
 
-  const summary = semesterSummary(semester, DEFAULT_PROJECTION_TARGET);
+  const summary = semesterSummary(semester);
 
   return (
     <main className="app-shell">
@@ -36,8 +36,9 @@ export default async function SemesterPage({ params }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <GpaCard label="Current GPA" value={summary.currentGpa} detail="Based on courses with scores" />
-        <GpaCard label="Projected GPA" value={summary.projectedGpa} detail={`If in-progress courses reach ${DEFAULT_PROJECTION_TARGET}%`} />
+        <GpaCard label="Projected GPA" value={summary.projectedGpa} emptyLabel="Not enough data for a projection" detail="Based on saved course targets" />
       </div>
+      {summary.missingTargetCourses.length > 0 && <p className="mt-3 text-sm text-slate-600">Projected GPA is based on partial data. Missing targets: {summary.missingTargetCourses.join(", ")}.</p>}
 
       <div className="mt-6"><GpaTrendChart semesters={[summary]} /></div>
 

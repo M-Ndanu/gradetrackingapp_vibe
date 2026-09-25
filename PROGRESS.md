@@ -81,3 +81,16 @@ Open decisions:
 - The single-user display name and final visual direction can be chosen during the UI phases.
 - The Neon migration is applied. The seed should be run before testing the seeded course links if the database is empty.
 - Phase 6 remains intentionally untouched.
+
+## Phase 5 correction: saved-target projected GPA
+
+Status: Complete.
+
+- Added an optional persisted target percentage to each course.
+- The course page now saves or clears its target instead of keeping it only in local browser state.
+- Dashboard and semester projected GPA calculations use each in-progress course's saved target.
+- In-progress courses without targets are excluded from projected GPA and named in a partial-data note.
+- When no in-progress course has a target, the projected GPA card shows `Not enough data for a projection`.
+- Added regression tests for targeted, partial, and no-target projections.
+
+This is a correction to Phase 5 dashboard behavior, not a new phase. Phase 6 remains untouched.
