@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { projectCourseGrade } from "@/lib/calculations";
 
 function SubmitButton({ children, pendingLabel = "Saving...", className = "" }) {
   return (
@@ -100,6 +101,65 @@ function CategorySection({ category, updateCategory, deleteCategory, createScore
   );
 }
 
+function ProjectionPanel({ course }) {
+  const [target, setTarget] = useState("80");
+  const targetPercentage = Number(target);
+  const projection = projectCourseGrade(
+    course,
+    Number.isFinite(targetPercentage) ? targetPercentage : 0,
+    [50, 75, 100],
+  );
+
+  const statusMessage = {
+    secured: "This target is already secured.",
+    "out-of-reach": "This target is out of reach with the remaining work.",
+    "in-progress": `You need an average of ${projection.neededAverage.toFixed(1)}% on the remaining work.`,
+  }[projection.status];
+
+  return (
+    <section className="panel">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow">Target grade</p>
+          <h2 className="section-title mt-2">Plan your finish</h2>
+          <p className="mt-2 max-w-xl text-sm text-slate-500">See what average you need on incomplete categories to reach your target percentage.</p>
+        </div>
+        <label className="w-32 text-sm font-semibold text-slate-600">
+          Target %
+          <input
+            className="field mt-1 text-lg font-bold"
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value={target}
+            onChange={(event) => setTarget(event.target.value)}
+          />
+        </label>
+      </div>
+
+      <div className={`mt-6 rounded-2xl p-5 ${projection.status === "out-of-reach" ? "bg-red-50 text-red-900" : projection.status === "secured" ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900"}`}>
+        <p className="text-lg font-bold">{statusMessage}</p>
+        <p className="mt-2 text-sm opacity-80">{projection.remainingWeight}% of the course remains. {projection.earned.toFixed(1)} percentage points are secured.</p>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Sample outcomes</h3>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {projection.samples.map((sample) => (
+            <div key={sample.average} className="rounded-xl border border-slate-200 p-4">
+              <p className="text-sm text-slate-500">{sample.average}% remaining average</p>
+              <p className="mt-1 text-2xl font-bold text-slate-950">{sample.percentage}%</p>
+              <p className="text-sm font-semibold text-slate-600">{sample.letter} · {sample.points.toFixed(1)} points</p>
+              {sample.isFail && <p className="mt-1 text-xs font-bold text-red-700">Fail</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function CourseEditor({ course, actions }) {
   const [message, setMessage] = useState(null);
   const totalWeight = course.categories.reduce((sum, category) => sum + category.weight, 0);
@@ -116,6 +176,8 @@ export default function CourseEditor({ course, actions }) {
         <div><p className="eyebrow">{course.semester.year.label} · {course.semester.name}</p><h1 className="display-title">{course.name}</h1><p className="mt-2 text-slate-600">{course.creditHours} credit hours{course.prerequisiteNote ? ` · ${course.prerequisiteNote}` : ""}</p></div>
         <div className={`rounded-2xl px-5 py-4 ${weightIsValid ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}><p className="text-xs font-bold uppercase tracking-wider">Weight total</p><p className="text-3xl font-bold">{totalWeight}%</p><p className="text-sm">{weightIsValid ? "Balanced" : "Adjust to 100%"}</p></div>
       </div>
+
+      <ProjectionPanel course={course} />
 
       <section className="panel">
         <div className="mb-2 flex items-center justify-between gap-4"><div><h2 className="section-title">Categories</h2><p className="text-sm text-slate-500">Organize your course work and keep the weights balanced.</p></div></div>

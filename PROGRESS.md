@@ -44,7 +44,21 @@ Completed:
 
 Next:
 
-- Phase 4: Add target-grade projection to the course page.
+## Phase 4: Target-grade projection
+
+Status: Complete.
+
+Completed:
+
+- Added a live target percentage input to the course page.
+- Connected the course editor to the pure `projectCourseGrade` calculation.
+- Added the required remaining-work message, including secured and out-of-reach states.
+- Added sample final grades for 50%, 75%, and 100% averages on remaining work.
+- Kept projection values computed from current raw category and score data; nothing is stored.
+
+Next:
+
+- Phase 5: Build the semester page and dashboard with GPA cards, chart, and stale-data banner.
 
 Open decisions:
 
