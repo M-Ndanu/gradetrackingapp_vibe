@@ -82,6 +82,21 @@ Open decisions:
 - The Neon migration is applied. The seed should be run before testing the seeded course links if the database is empty.
 - Phase 6 remains intentionally untouched.
 
+## Phase 6: Visual polish, empty states, and confirmations
+
+Status: Complete.
+
+Completed:
+
+- Added shared five-band traffic-light grade styles: dark green, light green, yellow, orange, and red.
+- Applied grade bands consistently to course summary grades and projection sample outcomes, including clear `Fail` labels below 70.
+- Improved no-score category messaging with a direct next step: `No scores yet. Add your first one below.`
+- Added a visible, dismissible success/error toast for every course category, score, and target form action.
+- Added a more intentional empty-state surface for missing dashboard, semester, course, and score data.
+- Added [ARCHITECTURE.md](ARCHITECTURE.md) with the folder map, data flow, component boundaries, and add-score trace.
+
+This is the final planned phase. Do not start additional implementation work without a new request.
+
 ## Phase 5 correction: saved-target projected GPA
 
 Status: Complete.

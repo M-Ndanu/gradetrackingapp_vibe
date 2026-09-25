@@ -85,7 +85,7 @@ function CategorySection({ category, updateCategory, deleteCategory, createScore
           </ActionForm>
 
           <div className="mt-5">
-            {category.scores.length === 0 ? <p className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">No scores yet. Add your first one.</p> : category.scores.map((score) => <ScoreRow key={score.id} score={score} updateScore={updateScore} deleteScore={deleteScore} onResult={onResult} />)}
+            {category.scores.length === 0 ? <p className="empty-state"><strong className="text-slate-700">No scores yet.</strong> Add your first one below to start tracking this category.</p> : category.scores.map((score) => <ScoreRow key={score.id} score={score} updateScore={updateScore} deleteScore={deleteScore} onResult={onResult} />)}
           </div>
 
           <ActionForm action={createScore} onResult={onResult} className="mt-4 grid gap-3 rounded-2xl border border-dashed border-slate-300 p-4 md:grid-cols-[1fr_110px_110px_auto] md:items-end">
@@ -149,11 +149,11 @@ function ProjectionPanel({ course, updateCourseTarget, onResult }) {
         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Sample outcomes</h3>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           {projection.samples.map((sample) => (
-            <div key={sample.average} className="rounded-xl border border-slate-200 p-4">
+            <div key={sample.average} className={`rounded-xl border border-slate-200 p-4 grade-band-${sample.colorBand}`}>
               <p className="text-sm text-slate-500">{sample.average}% remaining average</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{sample.percentage}%</p>
               <p className="text-sm font-semibold text-slate-600">{sample.letter} · {sample.points.toFixed(1)} points</p>
-              {sample.isFail && <p className="mt-1 text-xs font-bold text-red-700">Fail</p>}
+              {sample.isFail && <p className="mt-1 text-xs font-bold">Fail</p>}
             </div>
           ))}
         </div>
@@ -173,7 +173,7 @@ export default function CourseEditor({ course, actions }) {
 
   return (
     <div className="space-y-8">
-      {message && <div role="status" className={`rounded-2xl px-4 py-3 text-sm font-semibold ${message.type === "success" ? "bg-emerald-100 text-emerald-900" : "bg-red-100 text-red-900"}`}>{message.text}</div>}
+      {message && <div role="status" className={`toast ${message.type === "error" ? "toast-error" : ""}`}><span>{message.text}</span><button type="button" onClick={() => setMessage(null)} className="text-sm font-bold underline underline-offset-2">Dismiss</button></div>}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div><p className="eyebrow">{course.semester.year.label} · {course.semester.name}</p><h1 className="display-title">{course.name}</h1><p className="mt-2 text-slate-600">{course.creditHours} credit hours{course.prerequisiteNote ? ` · ${course.prerequisiteNote}` : ""}</p></div>
         <div className={`rounded-2xl px-5 py-4 ${weightIsValid ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}><p className="text-xs font-bold uppercase tracking-wider">Weight total</p><p className="text-3xl font-bold">{totalWeight}%</p><p className="text-sm">{weightIsValid ? "Balanced" : "Adjust to 100%"}</p></div>
