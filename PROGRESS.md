@@ -58,9 +58,26 @@ Completed:
 
 Next:
 
-- Phase 5: Build the semester page and dashboard with GPA cards, chart, and stale-data banner.
+## Phase 5: Semester page and dashboard
+
+Status: Complete.
+
+Completed:
+
+- Replaced the starter root page with a personalized dashboard welcome.
+- Added current and projected overall GPA cards using credit-hour-weighted calculations.
+- Added a semester GPA trend line chart with an accessible SVG and an empty state.
+- Added horizontally scrollable semester cards ordered newest to oldest and labeled by year.
+- Added `/semesters/[semesterId]` with the same GPA and course-summary layout scoped to one semester.
+- Added a page-load stale-data banner for courses with no categories, empty categories, or no updates for 14+ days.
+- Added pure stale-data and dashboard summary helpers in `lib/dashboard.js` with unit tests.
+
+Next:
+
+- Phase 6: Visual polish, empty states, and toasts.
 
 Open decisions:
 
 - The single-user display name and final visual direction can be chosen during the UI phases.
 - The Neon migration is applied. The seed should be run before testing the seeded course links if the database is empty.
+- Phase 6 remains intentionally untouched.

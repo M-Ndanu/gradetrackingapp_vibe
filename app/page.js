@@ -1,69 +1,66 @@
-import Image from "next/image";
+import Link from "next/link";
+import CourseSummaryCard from "@/app/components/CourseSummaryCard";
+import GpaCard from "@/app/components/GpaCard";
+import GpaTrendChart from "@/app/components/GpaTrendChart";
+import SemesterCard from "@/app/components/SemesterCard";
+import StaleDataBanner from "@/app/components/StaleDataBanner";
+import {
+  DEFAULT_PROJECTION_TARGET,
+  semesterSummary,
+  staleCourseReasons,
+} from "@/lib/dashboard";
+import { calculateGpa, calculateProjectedGpa } from "@/lib/calculations";
+import { prisma } from "@/lib/prisma";
 
-export default function Home() {
+export default async function DashboardPage() {
+  const semesters = await prisma.semester.findMany({
+    include: {
+      year: true,
+      courses: {
+        orderBy: { name: "asc" },
+        include: { categories: { include: { scores: true } } },
+      },
+    },
+  });
+  const newestFirst = [...semesters].sort((left, right) => right.createdAt - left.createdAt);
+  const summaries = newestFirst.map((semester) => semesterSummary(semester, DEFAULT_PROJECTION_TARGET));
+  const allCourses = newestFirst.flatMap((semester) => semester.courses);
+  const courseSummaries = summaries.flatMap((semester) => semester.courses);
+  const staleCourses = allCourses
+    .map((course) => ({ id: course.id, name: course.name, reasons: staleCourseReasons(course) }))
+    .filter((course) => course.reasons.length > 0);
+  const currentGpa = calculateGpa(allCourses);
+  const projectedGpa = calculateProjectedGpa(allCourses, DEFAULT_PROJECTION_TARGET);
+  const trend = [...summaries].reverse();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="app-shell">
+      <header className="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p className="eyebrow">Grade tracker</p>
+          <h1 className="display-title mt-2">Welcome back, Cindy.</h1>
+          <p className="mt-4 max-w-xl text-lg text-slate-600">A clear view of where your grades stand and what is still within reach.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <Link href="/courses" className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">Manage courses</Link>
+      </header>
+
+      <section className="mt-10 grid gap-4 md:grid-cols-2">
+        <GpaCard label="Overall GPA" value={currentGpa} detail="Current credit-hour-weighted GPA" />
+        <GpaCard label="Projected GPA" value={projectedGpa} detail={`If in-progress courses reach ${DEFAULT_PROJECTION_TARGET}%`} />
+      </section>
+
+      <div className="mt-6"><StaleDataBanner staleCourses={staleCourses} /></div>
+      <div className="mt-6"><GpaTrendChart semesters={trend} /></div>
+
+      <section className="mt-10">
+        <div className="flex items-end justify-between gap-4"><div><p className="eyebrow">By term</p><h2 className="section-title mt-2">Your semesters</h2></div><span className="text-sm text-slate-500">Newest first</span></div>
+        {summaries.length === 0 ? <p className="empty-state">No semesters yet. Add your first semester.</p> : <div className="mt-5 flex gap-4 overflow-x-auto pb-4">{summaries.map((semester) => <SemesterCard key={semester.id} semester={semester} />)}</div>}
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-end justify-between gap-4"><div><p className="eyebrow">Across every term</p><h2 className="section-title mt-2">Course snapshot</h2></div><Link href="/courses" className="text-sm font-semibold text-teal-800">View all courses →</Link></div>
+        {allCourses.length === 0 ? <p className="empty-state">No courses yet. Add your first course.</p> : <div className="mt-5 grid gap-4 md:grid-cols-2">{allCourses.map((course) => <CourseSummaryCard key={course.id} course={courseSummaries.find((summary) => summary.id === course.id)} />)}</div>}
+      </section>
+    </main>
   );
 }
