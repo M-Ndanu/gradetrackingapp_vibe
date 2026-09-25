@@ -1,0 +1,60 @@
+// Release 1 ERD — gradetracker
+// Paste this whole file into dbdiagram.io (it auto-renders the diagram)
+
+Table Year {
+  id String [pk]
+  label String
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Semester {
+  id String [pk]
+  name String
+  yearId String [ref: > Year.id]
+  createdAt DateTime
+  updatedAt DateTime
+
+  indexes {
+    (yearId, name) [unique]
+  }
+}
+
+Table Course {
+  id String [pk]
+  name String
+  creditHours Int
+  prerequisiteNote String [null]
+  targetPercentage Float [null]
+  semesterId String [ref: > Semester.id]
+  createdAt DateTime
+  updatedAt DateTime
+
+  indexes {
+    (semesterId, name) [unique]
+  }
+}
+
+Table Category {
+  id String [pk]
+  name String
+  weight Float
+  isComplete Boolean [default: false]
+  courseId String [ref: > Course.id]
+  createdAt DateTime
+  updatedAt DateTime
+
+  indexes {
+    (courseId, name) [unique]
+  }
+}
+
+Table Score {
+  id String [pk]
+  name String
+  mark Float
+  outOf Float
+  categoryId String [ref: > Category.id]
+  createdAt DateTime
+  updatedAt DateTime
+}
