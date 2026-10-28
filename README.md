@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+﻿# Grade Tracking App
 
-## Getting Started
+A grade tracker for managing semesters, courses, weighted categories, assignment scores, and GPA. This app helps students keep a clear view of where they stand in each class and what they need to reach their target grade.
 
-First, run the development server:
+## What this app does
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Track semesters and courses across an academic year
+- Add credit hours and target percentages for each course
+- Manage categories such as homework, quizzes, projects, tests, and participation
+- Record individual scores with a mark and total value
+- Calculate weighted category averages and course percentages
+- Display course grades and overall GPA using credit-hour weighting
+- Estimate projected GPA from saved course targets
+- Identify stale course data when scores or updates have not changed recently
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Core grading logic
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+The app calculates each course percentage by averaging the scored categories with their weights. Those weighted percentages are then converted into a grade and used to calculate GPA across credit-bearing courses.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech stack
 
-## Learn More
+- Next.js
+- React
+- Prisma
+- PostgreSQL
+- Tailwind CSS
 
-To learn more about Next.js, take a look at the following resources:
+## Local development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Install dependencies:
+   `ash
+   npm install
+   `
+2. Copy the environment example and set your database connection values:
+   `ash
+   copy .env.example .env
+   `
+3. Generate the Prisma client and initialize the database:
+   `ash
+   npm run db:generate
+   npm run db:migrate -- --name init
+   npm run db:seed
+   `
+4. Start the app:
+   `ash
+   npm run dev
+   `
+5. Open http://localhost:3000 to view the app.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Useful commands
 
-## Deploy on Vercel
+`ash
+npm run lint
+npm test
+`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is designed for student workflows where weighted categories, score entries, and GPA reporting matter more than raw gradebook exports. It keeps course records organized by semester and updates summary data as assignments and assessments change.
